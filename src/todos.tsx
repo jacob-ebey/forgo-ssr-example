@@ -3,13 +3,25 @@ import { ForgoComponent, ForgoElementProps, rerender } from "forgo";
 /*
   The main Todo List component
 */
-interface TodoListProps extends ForgoElementProps {}
+interface TodoListProps extends ForgoElementProps {
+  label: string;
+  timeout?: number;
+}
 
 export function TodoList(props: TodoListProps): ForgoComponent<TodoListProps> {
   let todos: string[] = [];
+  let c = 0;
+  const test = new Promise((res) =>
+    setTimeout(() => res("Hello, World!"), props.timeout || 2000)
+  );
 
   return {
     render(props, args) {
+      if (props.timeout !== 0 && typeof window !== "undefined" && c === 0) {
+        c = 1;
+        throw test;
+      }
+
       function onTodoAdd(text: string) {
         todos.push(text);
         rerender(args.element);
@@ -17,7 +29,7 @@ export function TodoList(props: TodoListProps): ForgoComponent<TodoListProps> {
 
       return (
         <div>
-          <h1>Forgo Todos</h1>
+          <h1>Forgo Todos {props.label}</h1>
           <ul>
             {todos.map((t) => (
               <TodoListItem text={t} />
