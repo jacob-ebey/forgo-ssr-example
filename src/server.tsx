@@ -6,13 +6,33 @@ import { renderToString } from "forgo-render-to-string";
 
 import App from "./App";
 
-const requestListener = (
+const maxRetries = 1;
+
+const requestListener = async (
   req: http.IncomingMessage,
   res: http.ServerResponse
 ) => {
   if (req.url === "/") {
     res.writeHead(200);
-    const html = renderToString(<App />, { pretty: true });
+    let promises: Set<Promise<any>> = new Set();
+    const onError = (err: any) => {
+      if (err && err.then) {
+        promises.add(err);
+      }
+    };
+
+    let retry = 1;
+    const app = <App />;
+    let html = renderToString(app, { pretty: true, onError });
+
+    while (promises.size > 0 && retry <= maxRetries) {
+      console.log("RETRY", retry);
+      console.log("PROMISES", promises);
+      await Promise.all(Array.from(promises));
+      retry++;
+      promises = new Set();
+      html = renderToString(app, { pretty: true, onError });
+    }
 
     res.end(`<!DOCTYPE html>
 <html lang="en-us">

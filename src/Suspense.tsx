@@ -2,20 +2,28 @@ import { ForgoComponent, ForgoElementProps, ForgoNode, rerender } from "forgo";
 
 interface SuspenseProps extends ForgoElementProps {
   fallback?: ForgoNode;
+  errorFallback?: ForgoNode;
+  state?: { promises: Promise<any>[] };
 }
 
-function Suspense(props: SuspenseProps): ForgoComponent<SuspenseProps> {
+function Suspense(): ForgoComponent<SuspenseProps> {
   return {
-    render(props, args) {
+    render(props) {
       return <div>{props.children}</div>;
     },
     error(props, { error, element }) {
       if (error && error.then) {
-        error.then(() => rerender(element));
+        if (props.state) {
+          props.state.promises.push(error);
+        } else {
+          error.then(() => rerender(element));
+        }
+
         return props.fallback || "";
       }
 
-      return <p>Error :(</p>;
+      // TODO: Figure out why ts doesn't like returning a string
+      return props.errorFallback || ("Internal Error" as any);
     },
   };
 }

@@ -1,9 +1,7 @@
-import { hydrate } from "forgo";
+import { render } from "forgo";
 
 import App from "./App";
 
-const vnode = <App />;
+const { node } = render(<App />);
 
-hydrate(vnode, document.body, {
-  root: document.body.firstElementChild as HTMLElement,
-});
+document.body.firstElementChild!.replaceWith(node);

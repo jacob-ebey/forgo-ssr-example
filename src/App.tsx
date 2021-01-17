@@ -1,5 +1,6 @@
 import { ForgoComponent, ForgoElementProps, rerender } from "forgo";
 
+import { ProfileDetails, ProfileTimeline } from "./profile";
 import { TodoList } from "./todos";
 
 import Suspense from "./Suspense";
@@ -12,13 +13,15 @@ function App(props: AppProps): ForgoComponent<AppProps> {
       return (
         <div>
           <Suspense fallback="loading (a, b)">
-            <TodoList label="a" timeout={2000} />
-            <TodoList label="b" timeout={1000} />
+            <TodoList label="a" />
+            <TodoList label="b" />
           </Suspense>
 
-          <Suspense fallback="(c, d)">
-            <TodoList label="c" timeout={500} />
-            <TodoList label="d" timeout={0} />
+          <Suspense fallback={<h1>Loading profile...</h1>}>
+            <ProfileDetails />
+            <Suspense fallback={<h1>Loading posts...</h1>}>
+              <ProfileTimeline />
+            </Suspense>
           </Suspense>
         </div>
       );
